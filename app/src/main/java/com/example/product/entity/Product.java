@@ -1,16 +1,24 @@
-package com.example.product.models;
+package com.example.product.entity;
 
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "product")
 public class Product {
+    @PrimaryKey(autoGenerate = true)
     private int id;
     private String name;
     private double price;
 
-    public Product(int id) {
-        this.id = id;
-    }
-
     public Product(int id, String name, double price) {
         this.id = id;
+        this.name = name;
+        this.price = price;
+    }
+
+    @Ignore
+    public Product(String name, double price) {
         this.name = name;
         this.price = price;
     }

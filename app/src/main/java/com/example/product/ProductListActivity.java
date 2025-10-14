@@ -1,7 +1,6 @@
 package com.example.product;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -11,20 +10,19 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.product.dao.ProductDao;
 import com.example.product.databinding.ActivityListProductBinding;
-import com.example.product.models.Product;
+import com.example.product.entity.Product;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ProductListActivity extends AppCompatActivity {
 
     ActivityListProductBinding binding;
-    DatabaseHelper dbHelper;
+    AppDatabase db;
+    ProductDao dao;
     ProductAdapter adapter;
-    List<Product> products;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,25 +35,27 @@ public class ProductListActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        dbHelper = new DatabaseHelper(this);
-        products = dbHelper.getAllProducts();
+        db = AppDatabase.getInstance(this);
+        dao = db.productDao();
 
-        adapter = new ProductAdapter(products);
+        if (dao.getAll().isEmpty()) {
+            dao.insert(new Product("Laptop", 999.99));
+            dao.insert(new Product("Keyboard", 49.99));
+            dao.insert(new Product("Mouse", 29.99));
+            dao.insert(new Product("Monitor", 199.99));
+            dao.insert(new Product("Headphones", 89.99));
+            dao.insert(new Product("Smartphone", 699.99));
+            dao.insert(new Product("USB Cable", 9.99));
+        }
+
+        List<Product> products = dao.getAll();
+        adapter = new ProductAdapter(products, dao, this::refreshList);
         binding.recyclerViewProducts.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerViewProducts.setAdapter(adapter);
+    }
 
-//        binding.btnAdd.setOnClickListener(v -> {
-//            String name = binding.etName.getText().toString().trim();
-//            String priceText = binding.etPrice.getText().toString().trim();
-//            if (name.isEmpty() || priceText.isEmpty()) return;
-//
-//            double price = Double.parseDouble(priceText);
-//            dbHelper.insertProduct(new Product(0, name, price));
-//            refreshList();
-//
-//            binding.etName.setText("");
-//            binding.etPrice.setText("");
-//        });
+    private void refreshList() {
+        adapter.refreshData(dao.getAll());
     }
 
     @Override
@@ -77,7 +77,7 @@ public class ProductListActivity extends AppCompatActivity {
     }
 
     private void showAddDialog() {
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_product, null);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_form_product, null);
         EditText etName = dialogView.findViewById(R.id.etAddName);
         EditText etPrice = dialogView.findViewById(R.id.etAddPrice);
 
@@ -89,7 +89,7 @@ public class ProductListActivity extends AppCompatActivity {
                     String priceText = etPrice.getText().toString().trim();
                     if (!name.isEmpty() && !priceText.isEmpty()) {
                         double price = Double.parseDouble(priceText);
-                        dbHelper.insertProduct(new Product(0, name, price));
+                        dao.insert(new Product(name, price));
                         refreshList();
                     }
                 })
@@ -97,8 +97,4 @@ public class ProductListActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void refreshList() {
-        List<Product> updatedList = dbHelper.getAllProducts();
-        adapter.refreshData(updatedList);
-    }
 }

@@ -35,6 +35,9 @@ android {
 }
 
 dependencies {
+    implementation("com.squareup.picasso:picasso:2.5.2")
+    implementation("androidx.room:room-runtime:2.8.2")
+    annotationProcessor("androidx.room:room-compiler:2.8.2")
 
     implementation(libs.appcompat)
     implementation(libs.material)
