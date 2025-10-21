@@ -1,26 +1,20 @@
-package com.example.product.entity;
+package com.example.product.dto;
 
-import androidx.room.Entity;
-import androidx.room.Ignore;
-import androidx.room.PrimaryKey;
-
-@Entity(tableName = "product")
-public class Product {
-    @PrimaryKey(autoGenerate = true)
+public class ProductDto {
     private int id;
     private String name;
     private double price;
 
-    public Product() {    }
+    public ProductDto() {
+    }
 
-    public Product(int id, String name, double price) {
-        this.id = id;
+    public ProductDto(String name, double price) {
         this.name = name;
         this.price = price;
     }
 
-    @Ignore
-    public Product(String name, double price) {
+    public ProductDto(int id, String name, double price) {
+        this.id = id;
         this.name = name;
         this.price = price;
     }
@@ -48,4 +42,5 @@ public class Product {
     public void setPrice(double price) {
         this.price = price;
     }
+
 }

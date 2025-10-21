@@ -13,7 +13,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.product.dao.ProductDao;
 import com.example.product.databinding.ActivityListProductBinding;
+import com.example.product.dto.ProductDto;
 import com.example.product.entity.Product;
+import com.example.product.repository.ProductRepository;
 
 import java.util.List;
 
@@ -21,7 +23,7 @@ public class ProductListActivity extends AppCompatActivity {
 
     ActivityListProductBinding binding;
     AppDatabase db;
-    ProductDao dao;
+    ProductRepository productRepository;
     ProductAdapter adapter;
 
     @Override
@@ -35,27 +37,26 @@ public class ProductListActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        db = AppDatabase.getInstance(this);
-        dao = db.productDao();
+        productRepository = new ProductRepository(this);
 
-        if (dao.getAll().isEmpty()) {
-            dao.insert(new Product("Laptop", 999.99));
-            dao.insert(new Product("Keyboard", 49.99));
-            dao.insert(new Product("Mouse", 29.99));
-            dao.insert(new Product("Monitor", 199.99));
-            dao.insert(new Product("Headphones", 89.99));
-            dao.insert(new Product("Smartphone", 699.99));
-            dao.insert(new Product("USB Cable", 9.99));
+        if (productRepository.getAllProducts().isEmpty()) {
+            productRepository.insertProduct(new ProductDto("Laptop", 999.99));
+            productRepository.insertProduct(new ProductDto("Keyboard", 49.99));
+            productRepository.insertProduct(new ProductDto("Mouse", 29.99));
+            productRepository.insertProduct(new ProductDto("Monitor", 199.99));
+            productRepository.insertProduct(new ProductDto("Headphones", 89.99));
+            productRepository.insertProduct(new ProductDto("Smartphone", 699.99));
+            productRepository.insertProduct(new ProductDto("USB Cable", 9.99));
         }
 
-        List<Product> products = dao.getAll();
-        adapter = new ProductAdapter(products, dao, this::refreshList);
+        List<ProductDto> products = productRepository.getAllProducts();
+        adapter = new ProductAdapter(products, productRepository, this::refreshList);
         binding.recyclerViewProducts.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerViewProducts.setAdapter(adapter);
     }
 
     private void refreshList() {
-        adapter.refreshData(dao.getAll());
+        adapter.refreshData(productRepository.getAllProducts());
     }
 
     @Override
@@ -89,7 +90,7 @@ public class ProductListActivity extends AppCompatActivity {
                     String priceText = etPrice.getText().toString().trim();
                     if (!name.isEmpty() && !priceText.isEmpty()) {
                         double price = Double.parseDouble(priceText);
-                        dao.insert(new Product(name, price));
+                        productRepository.insertProduct(new ProductDto(name, price));
                         refreshList();
                     }
                 })
