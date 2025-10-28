@@ -4,7 +4,7 @@
 <!--        &lt;!&ndash; Customize your light theme here. &ndash;&gt;-->
 <!--        &lt;!&ndash; <item name="colorPrimary">@color/my_light_primary</item> &ndash;&gt;-->
 <!--    </style>-->
-    <style name="Base.Theme.Product" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="Base.Theme.Product" parent="Theme.AppCompat.DayNight.DarkActionBar">
         <!-- Customize your light theme here. -->
          <item name="colorPrimary">@color/design_default_color_primary_dark</item>
     </style>

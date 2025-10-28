@@ -14,13 +14,18 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/product_list"
+        android:title="Product List"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/test_permissions"
         android:title="GPS Permission"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/test_notification"
-        android:title="Notification"
+        android:title="Send Notification (Unbound)"
         app:showAsAction="never"/>
 
 </menu>

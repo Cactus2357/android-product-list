@@ -1,4 +1,4 @@
-package com.example.product;
+package com.example.product.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.product.databinding.ItemProductBinding;
+import com.example.product.R;
+import com.example.product.databinding.ProductItemBinding;
 import com.example.product.dto.ProductDto;
 import com.example.product.repository.ProductRepository;
 
@@ -28,8 +29,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        ItemProductBinding binding;
-        public ViewHolder(ItemProductBinding binding) {
+        ProductItemBinding binding;
+        public ViewHolder(ProductItemBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }
@@ -38,7 +39,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ItemProductBinding binding = ItemProductBinding.inflate(
+        ProductItemBinding binding = ProductItemBinding.inflate(
                 LayoutInflater.from(parent.getContext()), parent, false);
         return new ViewHolder(binding);
     }
@@ -85,7 +86,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     private void showEditDialog(View v, ProductDto p) {
         View dialogView = LayoutInflater.from(v.getContext())
-                .inflate(R.layout.dialog_form_product, null);
+                .inflate(R.layout.dialog_product_form, null);
         EditText etName = dialogView.findViewById(R.id.etAddName);
         EditText etPrice = dialogView.findViewById(R.id.etAddPrice);
 

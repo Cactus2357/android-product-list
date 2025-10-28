@@ -1,14 +1,10 @@
 package com.example.product;
 
-import static android.app.NotificationManager.IMPORTANCE_HIGH;
-
 import android.Manifest;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
+import android.app.ComponentCaller;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,20 +14,39 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
-import androidx.navigation.ui.AppBarConfiguration;
 
 import com.example.product.databinding.ActivityMainBinding;
+import com.example.product.fragment.ProductListFragment;
+import com.example.product.service.MyBoundService;
+import com.example.product.service.MyUnboundService;
 
+import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
+
+    private MyBoundService boundService;
+    private boolean isBound = false;
+
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MyBoundService.LocalBinder binder = (MyBoundService.LocalBinder) service;
+            boundService = binder.getService();
+            isBound = true;
+            Toast.makeText(MainActivity.this, "Bound to service", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            isBound = false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,22 +54,46 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        Intent intent = getIntent();
-        String msg = intent.getStringExtra("msg");
-        if (msg != null) {
-            binding.message.setText(msg);
-        } else {
-            binding.message.setText("Default message");
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(binding.fragmentContainer.getId(), new ProductListFragment())
+                    .commit();
         }
 
+        requestPostNotificationsPermission();
+        bindService();
+    }
+
+    private void bindService() {
+        binding.btnOpenList.setText("Show Time (BoundService)");
         binding.btnOpenList.setOnClickListener(v -> {
-            startActivity(new Intent(this, ProductListActivity.class));
+            if (isBound && boundService != null) {
+                String timestamp = boundService.getCurrentTimestamp();
+                binding.message.setText("Current Time: " + timestamp);
+            } else {
+                Toast.makeText(this, "Service not bound yet", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        Intent intent = new Intent(this, MyBoundService.class);
+        bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (isBound) {
+            unbindService(serviceConnection);
+            isBound = false;
+        }
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -64,43 +103,45 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
-            return true;
+
+        } else if (id == R.id.product_list) {
+            startActivity(new Intent(this, ProductListActivity.class));
+
         } else if (id == R.id.test_permissions) {
             requestPermission();
-            return true;
+
         } else if (id == R.id.test_notification) {
-            sendNotification();
-            return true;
+            Intent intent = new Intent(this, MyUnboundService.class);
+            intent.putExtra("msg", "This is a notification sent from Unbound service");
+            startService(intent);
+            Toast.makeText(this, "Notification sent", Toast.LENGTH_SHORT).show();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void sendNotification() {
-        String CHANNEL_ID = "001";
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setContentTitle("Notification Title")
-                .setContentText("Notification Content")
-                .setAutoCancel(false)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+    @Override
+    public void onNewIntent(@NonNull Intent intent, @NonNull ComponentCaller caller) {
+        super.onNewIntent(intent, caller);
+        setIntent(intent);
+        handleIntent(intent);
+    }
 
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("msg", "Hello! This is a notification message.");
+    @Override
+    protected void onResume() {
+        super.onResume();
+        handleIntent(getIntent());
+    }
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-
-        builder.setContentIntent(pendingIntent);
-
-        Notification notification = builder.build();
-
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "Demo channel", IMPORTANCE_HIGH);
-            notificationManager.createNotificationChannel(notificationChannel);
+    private void handleIntent(Intent intent) {
+        if (intent == null) {
+            return;
         }
 
-        notificationManager.notify(1, notification);
+        if (intent.hasExtra("msg")) {
+            String msg = intent.getStringExtra("msg");
+            binding.message.setText(msg);
+        }
     }
 
     private void requestPermission() {
@@ -117,41 +158,16 @@ public class MainActivity extends AppCompatActivity {
                 new AlertDialog.Builder(this)
                         .setTitle("Request GPS Permission")
                         .setMessage("This app needs location permission to access GPS features.")
-                        .setPositiveButton("Cancel", (dialog, which) -> {
-                            ActivityCompat.requestPermissions(
-                                    this,
-                                    new String[]{
-                                            Manifest.permission.ACCESS_COARSE_LOCATION,
-                                            Manifest.permission.ACCESS_FINE_LOCATION
-                                    },
-                                    1
-                            );
+                        .setPositiveButton("OK", (dialog, which) -> {
+                            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 1);
                             dialog.dismiss();
                         })
-                        .setNegativeButton("OK", (dialog, which) -> {
-//                            ActivityCompat.requestPermissions(
-//                                    this,
-//                                    new String[]{
-//                                            Manifest.permission.ACCESS_COARSE_LOCATION,
-//                                            Manifest.permission.ACCESS_FINE_LOCATION
-//                                    },
-//                                    1
-//                            );
-                            dialog.dismiss();
-
-                        })
+                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                         .show();
 
             } else {
                 // Directly request if no explanation needed
-                ActivityCompat.requestPermissions(
-                        this,
-                        new String[]{
-                                Manifest.permission.ACCESS_COARSE_LOCATION,
-                                Manifest.permission.ACCESS_FINE_LOCATION
-                        },
-                        1
-                );
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             }
         } else {
             Toast.makeText(this, "Permission already granted", Toast.LENGTH_SHORT).show();
@@ -163,11 +179,27 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == 1) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
-            }
+            boolean permissionGranted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+
+            Toast.makeText(
+                    this,
+                    permissionGranted ? "Location Permission granted" : "Location Permission denied",
+                    Toast.LENGTH_SHORT
+            ).show();
+        } else if (requestCode == 100) {
+            boolean permissionGranted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            Toast.makeText(
+                    this,
+                    permissionGranted ? "Notification Permission granted" : "Notification Permission denied",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
+    }
+
+    private void requestPostNotificationsPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 100);
         }
     }
 }
