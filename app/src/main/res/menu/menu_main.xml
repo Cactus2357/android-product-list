@@ -28,4 +28,10 @@
         android:title="Send Notification (Unbound)"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/google_map"
+        android:title="Open Google Map"
+        app:showAsAction="never"/>
+
+
 </menu>

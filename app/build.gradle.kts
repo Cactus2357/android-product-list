@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
 }
 
 android {
@@ -14,6 +15,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val mapsApiKey: String = providers.gradleProperty("MAPS_API_KEY").orNull ?: ""
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
     }
 
     buildTypes {
@@ -37,6 +41,7 @@ android {
 dependencies {
     implementation("com.squareup.picasso:picasso:2.5.2")
     implementation("androidx.room:room-runtime:2.8.2")
+    implementation(libs.play.services.maps)
     annotationProcessor("androidx.room:room-compiler:2.8.2")
 
     implementation(libs.appcompat)
