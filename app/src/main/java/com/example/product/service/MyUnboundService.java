@@ -15,7 +15,7 @@ import android.os.IBinder;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-import com.example.product.MainActivity;
+import com.example.product.activity.MainActivity;
 import com.example.product.R;
 
 public class MyUnboundService extends Service {

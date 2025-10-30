@@ -1,4 +1,4 @@
-package com.example.product;
+package com.example.product.activity;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -8,6 +8,7 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
+import com.example.product.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;

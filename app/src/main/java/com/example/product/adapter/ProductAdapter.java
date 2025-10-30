@@ -21,6 +21,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     private List<ProductDto> productList;
     private final ProductRepository productRepository;
     private final Runnable refreshCallback;
+    private boolean enableItemMenu = false;
+
+    public void setEnableItemMenu(boolean enableItemMenu) {
+        this.enableItemMenu = enableItemMenu;
+    }
 
     public ProductAdapter(List<ProductDto> productList, ProductRepository productRepository, Runnable refreshCallback) {
         this.productList = productList;
@@ -30,6 +35,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ProductItemBinding binding;
+
         public ViewHolder(ProductItemBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
@@ -62,7 +68,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         holder.binding.tvName.setText(p.getName());
         holder.binding.tvPrice.setText(String.format("$%.2f", p.getPrice()));
 
-        holder.binding.getRoot().setOnClickListener(v -> showItemMenu(v, p));
+        if (enableItemMenu) {
+            holder.binding.getRoot().setOnClickListener(v -> showItemMenu(v, p));
+        }
     }
 
     private void showItemMenu(View v, ProductDto p) {

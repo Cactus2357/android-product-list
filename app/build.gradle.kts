@@ -41,8 +41,15 @@ android {
 dependencies {
     implementation("com.squareup.picasso:picasso:2.5.2")
     implementation("androidx.room:room-runtime:2.8.2")
-    implementation(libs.play.services.maps)
     annotationProcessor("androidx.room:room-compiler:2.8.2")
+
+    implementation(libs.play.services.maps)
+//    implementation("com.google.android.gms.play-services-maps:19.2.0")
+    implementation("com.google.android.gms:play-services-places:17.1.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
     implementation(libs.appcompat)
     implementation(libs.material)

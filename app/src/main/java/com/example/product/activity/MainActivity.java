@@ -1,4 +1,4 @@
-package com.example.product;
+package com.example.product.activity;
 
 import android.Manifest;
 import android.app.ComponentCaller;
@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.product.R;
 import com.example.product.databinding.ActivityMainBinding;
 import com.example.product.fragment.ProductListFragment;
 import com.example.product.service.MyBoundService;
@@ -39,7 +40,8 @@ public class MainActivity extends AppCompatActivity {
             MyBoundService.LocalBinder binder = (MyBoundService.LocalBinder) service;
             boundService = binder.getService();
             isBound = true;
-            Toast.makeText(MainActivity.this, "Bound to service", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MainActivity.this, "Bound to service", Toast.LENGTH_SHORT).show();
+            System.out.println("MainActivity bound to service");
         }
 
         @Override
@@ -60,13 +62,19 @@ public class MainActivity extends AppCompatActivity {
                     .commit();
         }
 
+        findViewById(R.id.btnOpenProductList).setOnClickListener(v ->
+                startActivity(new Intent(this, ProductListActivity.class)));
+
+        findViewById(R.id.btnOpenPostList).setOnClickListener(v ->
+                startActivity(new Intent(this, PostListActivity.class)));
+
         requestPostNotificationsPermission();
         bindService();
     }
 
     private void bindService() {
-        binding.btnOpenList.setText("Show Time (BoundService)");
-        binding.btnOpenList.setOnClickListener(v -> {
+        binding.btnBoundService.setText("Show Time (BoundService)");
+        binding.btnBoundService.setOnClickListener(v -> {
             if (isBound && boundService != null) {
                 String timestamp = boundService.getCurrentTimestamp();
                 binding.message.setText("Current Time: " + timestamp);
@@ -104,8 +112,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (id == R.id.user_profile) {
             startActivity(new Intent(this, LoginActivity.class));
-        } else if (id == R.id.product_list) {
-            startActivity(new Intent(this, ProductListActivity.class));
+//        } else if (id == R.id.product_list) {
+//            startActivity(new Intent(this, ProductListActivity.class));
 
         } else if (id == R.id.test_permissions) {
             requestPermission();

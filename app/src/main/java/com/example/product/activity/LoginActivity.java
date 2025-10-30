@@ -1,4 +1,4 @@
-package com.example.product;
+package com.example.product.activity;
 
 import android.content.Intent;
 import android.os.Bundle;

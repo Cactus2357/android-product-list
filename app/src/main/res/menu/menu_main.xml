@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.product.MainActivity">
+    tools:context="com.example.product.activity.MainActivity">
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
@@ -13,10 +13,10 @@
         android:title="User Profile"
         app:showAsAction="never" />
 
-    <item
-        android:id="@+id/product_list"
-        android:title="Product List"
-        app:showAsAction="never" />
+<!--    <item-->
+<!--        android:id="@+id/product_list"-->
+<!--        android:title="Product List"-->
+<!--        app:showAsAction="never" />-->
 
     <item
         android:id="@+id/test_permissions"

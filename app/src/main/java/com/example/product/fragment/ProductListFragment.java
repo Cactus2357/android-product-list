@@ -7,8 +7,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -23,6 +21,12 @@ public class ProductListFragment extends Fragment {
     private FragmentProductListBinding binding;
     private ProductRepository productRepository;
     private ProductAdapter adapter;
+    private boolean enableItemMenu = false;
+
+    public ProductListFragment setEnableItemMenu(boolean enableItemMenu) {
+        this.enableItemMenu = enableItemMenu;
+        return this;
+    }
 
     @Nullable
     @Override
@@ -41,6 +45,7 @@ public class ProductListFragment extends Fragment {
 
         List<ProductDto> products = productRepository.getAllProducts();
         adapter = new ProductAdapter(products, productRepository, this::refreshList);
+        adapter.setEnableItemMenu(enableItemMenu);
         binding.recyclerViewProducts.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.recyclerViewProducts.setAdapter(adapter);
     }
